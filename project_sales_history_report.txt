@@ -1,0 +1,282 @@
+create table product
+(
+    prod_id int primary key,
+    prod_name varchar2(25) not null,
+    prod_category varchar2(25) not null,
+    prod_desc varchar(100) not null,
+    prod_size varchar(30) not null,
+    prod_status varchar(25) not null,
+    prod_total int not null,
+    prod_effective_from date not null,
+    prod_effective_to date not null
+);
+create table promotion
+(
+    promo_id int primary key,
+    promo_name varchar2(25) not null,
+    promo_category varchar2(25) not null,
+    promo_cost int not null
+);
+drop table tbl_time;
+create table tbl_time
+(
+    time_id int primary key,
+    t_month varchar2(25),
+    t_year int
+);
+create table costs
+(
+    prod_id int,
+    time_id int,
+    promo_id int,
+    promo_cost number(10,2),
+    constraint fk_pid foreign key(prod_id) references product(prod_id),
+    constraint fk_tid foreign key(time_id) references tbl_time(time_id),
+    constraint fk_promoid foreign key(promo_id) references promotion(promo_id)
+);
+create table customers
+(
+    cust_id int primary key,
+    cust_first_name varchar2(25) not null,
+    cust_last_name varchar2(25) not null,
+    cust_gender varchar2(6) not null,
+    cust_dob date,
+    cust_addres varchar2(50) not null,
+    cust_city varchar(25) not null,
+    cust_email varchar2(25) unique,
+    cust_phonenumber number(10) check(length(cust_phonenumber)=10),
+    cust_pincode int
+);
+
+create table sale
+(
+    prod_id int,
+    cust_id int,
+    time_id int,
+    promo_id int,
+    quantity_sold int not null,
+    amount_sold int not null,
+    constraint fk_spid foreign key(prod_id) references product(prod_id),
+    constraint fk_scid foreign key(cust_id) references customers(cust_id),
+    constraint fk_stid foreign key(time_id) references tbl_time(time_id),
+    constraint fk_spromoid foreign key(promo_id) references promotion(promo_id)
+);
+
+create sequence seq_products start with 100 increment by 1 nocache nocycle;
+create or replace procedure products_procedure
+(
+    p_name in product.prod_name%type,
+    p_cat in product.prod_category%type,
+    p_desc in product.prod_desc%type,
+    p_size in product.prod_size%type,
+    p_stat in product.prod_status%type,
+    p_total in product.prod_total%type,
+    p_effrom in product.prod_effective_from%type,
+    p_efto in product.prod_effective_to%type
+)
+is
+begin
+insert into product values(seq_products.nextval,p_name,p_cat,p_desc,p_size,p_stat,p_total,p_effrom,p_efto);
+end;
+begin
+products_procedure('smart TV','Electronics','Full HD smart TV with built-in streaming apps', '1 unit', 'Available', 500, '04-06-2022', '04-10-2023');
+products_procedure('summer Dress','Dresses','Floral-printed summer dress with spaghetti straps', '1 unit', 'Available', 35, '04-06-2022', '04-30-2023');
+products_procedure('Gardening Gloves','Gardening Tools', 'Pair of Gardening Gloves with reinforced fingertips and breathable fabric', '1 pair', 'not available', 8, '04-06-2022', '04-18-2023');
+products_procedure('Laptop', 'Computers','15.6" Laptop with Intel Core i5 procesor and 8GB RAM', '1 unit', 'Available', 700, '04-06-2022', '04-14-2023');
+products_procedure('Lipstick set', 'Cosmetics', 'set of 3 Lipsticks in different shades with long-lasting formula', '3 lipsticks', 'Available', 25, '04-06-2022', '04-30-2023');
+products_procedure('Gardening Gloves', 'Gardening Tools', 'Durable gardening gloves for outdoor work', '1 pair', 'Active', 10, '04-02-2023', '04-30-2023');
+products_procedure('Laptop', 'Computers', 'High-performance laptop for work and entertainment', '1 unit', 'Active', 1000, '04-01-2022', '04-30-2023');
+products_procedure('Lipstick', 'Cosmetics', 'Long-lasting lipstick for a glamorous look', '1 unit', 'Active', 15, '04-01-2022', '04-10-2023');
+products_procedure('Laptop', 'Electronics', 'Powerful and sleek laptop', '1 unit', 'Active', 100, '04-06-2022', '12-31-2023');
+products_procedure('smartphone', 'Electronics', 'High-end smartphone with advanced features', '1 unit', 'Active', 150, '04-01-2022', '04-30-2023');
+products_procedure('sundres', 'Dreses', 'stylish sundres for women', '1 unit', 'Active', 50, '04-05-2023', '04-15-2023');
+products_procedure('Air Purifier', 'Home Appliances', 'HEPA air purifier for clean indoor air', '1 unit', 'Active', 10, '04-02-2022', '04-30-2023');
+products_procedure('Running shoes', 'shoes', 'High-performance running shoes for athletes', '1 pair', 'Active', 80, '04-01-2023', '04-10-2023');
+products_procedure('Yoga Mat', 'sportswear', 'Non-slip yoga mat for comfortable workouts', '1 unit', 'Active', 20, '04-01-2022', '04-30-2023');
+products_procedure('Board Game', 'Toys', 'Clasic board game for hours of family fun', '1 unit', 'Active', 30, '04-03-2022', '04-30-2023');
+products_procedure('Winter Jacket', 'Outerwear', 'Warm winter jacket for cold weather', '1 unit', 'Active', 70, '04-01-2021', '04-15-2023');
+products_procedure('Notebook', 'stationery', 'spiral-bound notebook for writing and note-taking', '1 unit', 'Active', 50, '04-01-2022', '04-30-2023');
+products_procedure('Luxury Watch', 'Watches', 'Mens Luxury Watch with stainles steel strap and automatic movement', '1 unit', 'Available', 500, '04-06-2022', '04-30-2023');
+products_procedure( 'sofa', 'Furniture', '3-seater sofa with upholstered fabric and wooden frame', '1 unit', 'Available', 800, '04-06-2023', '04-20-2023');
+end;
+create sequence seq_promotion start with 100 increment by 1 nocache nocycle;
+create or replace procedure promotion_procedure
+(
+    promo_name in promotion.promo_name%type,
+    promo_category in promotion.promo_category%type,
+    promo_cost in promotion.promo_cost%type
+)
+is
+begin
+insert into promotion values(seq_promotion.nextval,promo_name,promo_category,promo_cost);
+end;
+begin
+promotion_procedure('big india sale','electronics',120567);
+promotion_procedure('great indian sale','dresses',326987);
+promotion_procedure('summer blowout sale','home Aappliances',543218);
+promotion_procedure('mega clearance sale','shoes',987654);
+promotion_procedure('end of season sale','sportswear',789012);
+promotion_procedure('holiday extravaganza','toys',345678);
+promotion_procedure('winter wonderland sale','outerwear',234567);
+promotion_procedure('back-to-school bonanza','stationery',876543);
+promotion_procedure('spring fling sale','gardening tools',654321);
+promotion_procedure('tech frenzy','computers',543210);
+promotion_procedure('beauty bonanza','cosmetics',987612);
+promotion_procedure('luxury showcase','watches',876543);
+promotion_procedure('home makeover sale','furniture',456789);
+promotion_procedure('family funAday','games',321098);
+promotion_procedure('fitnes fiesta','exercise equipment',567890);
+promotion_procedure('pet lovers','petsupplies', 789012);
+promotion_procedure('foodie frenzy','groceries', 987612);
+promotion_procedure('summer sizzler','grills',654321);
+promotion_procedure('artisticAinspirations','craftAsupplies',543210);
+promotion_procedure('travelAesentialsAsale','luggage',876543);
+promotion_procedure('book lovers','delight',234567);
+promotion_procedure('baby bonanza','baby products',789012);
+promotion_procedure('music mania','musical instruments',345678);
+promotion_procedure('homesparetreat','beauty and wellnes',456789);
+promotion_procedure('outdoor adventures','camping gear',987654);
+promotion_procedure('cooking extravaganza','cookware',54321);
+promotion_procedure('fashion frenzy','apparel',543210);
+promotion_procedure('party perfect','party supplies',876543);
+promotion_procedure('gourmet delights','gourmet foods',567890);
+promotion_procedure('green living','eco-friendly products',321098);
+end;
+create sequence seq_time start with 100 increment by 1 nocache nocycle;
+create or replace procedure time_procedure
+(
+    t_month in tbl_time.t_month%type,
+    t_year in tbl_time.t_year%type
+)
+is
+begin
+insert into tbl_time values(seq_time.nextval,t_month,t_year);
+end;
+begin 
+time_procedure('January',2021);
+time_procedure('February',2021);
+time_procedure('March',2021);
+time_procedure('April',2021);
+time_procedure('May',2021);
+time_procedure('June',2021);
+time_procedure('July',2021);
+time_procedure('August',2021);
+time_procedure('september',2021);
+time_procedure('October',2021);
+time_procedure('November',2021);
+time_procedure('December',2021);
+time_procedure('January',2022);
+time_procedure('February',2022);
+time_procedure('March',2022);
+time_procedure('April',2022);
+time_procedure('May',2022);
+time_procedure('June',2022);
+time_procedure('July',2022);
+time_procedure('August',2022);
+time_procedure('september',2022);
+time_procedure('October',2022);
+time_procedure('November',2022);
+time_procedure('December',2022);
+time_procedure('January',2023);
+time_procedure('February',2023);
+time_procedure('March',2023);
+time_procedure('April',2023);
+time_procedure('may',2023);
+time_procedure('june',2023);
+end;
+create sequence seq_customer start with 100 increment by 1 nocache nocycle;
+create or replace procedure customers_procedure
+(
+    cust_f in customers.cust_first_name%type,
+    cust_l in customers.cust_last_name%type,
+    cust_gender in customers.cust_gender%type,
+    cust_dob in customers.cust_dob%type,
+    cust_address in customers.cust_address%type,
+    cust_city in customers.cust_city%type,
+    cust_email in customers.cust_email%type,
+    cust_phonenumber in customers.cust_phonenumber%type,
+    cust_pincode in customers.cust_pincode%type
+)
+is
+begin
+insert into customers values(seq_customer.nextval,cust_f,cust_l,cust_gender,cust_dob,cust_address,cust_city,cust_email,cust_phonenumber,cust_pincode);
+end;
+begin
+customers_procedure('Michael', 'Johnson', 'M', '06-05-1978', 'Chicago', 'USA', 'michaeljohnson@gmail.com', 5552468135, 630007);
+customers_procedure('Daniel', 'Kim', 'M', '12-01-1982', 'Seoul', 'South Korea', 'danielkim@gmail.com', 8225559876, 044535);
+customers_procedure('Ava', 'Jones', 'F', '03-21-1998', 'London', 'UK', 'avajones@gmail.com', 4475551234, 502335);
+customers_procedure('Emma', 'Baker', 'F', '05-16-1996', 'Sydney', 'Australia', 'emmabaker@gmail.com', 6125551234, 203402);
+customers_procedure('Alexander', 'Lee', 'M', '10-28-1991', 'Tokyo', 'Japan', 'alexanderlee@gmail.com', 8135559876, 100006);
+customers_procedure('Olivia', 'Gupta', 'F', '07-09-1989', 'NewDelhi', 'India', 'oliviagupta@gmail.com', 9115551234, 110001);
+customers_procedure('Andrew', 'Singh', 'M', '02-14-1994', 'Dubai', 'UAE', 'andrewsingh@gmail.com', 9715559876, 123465);
+customers_procedure('Charlotte', 'Chen', 'F', '12-18-1986', 'Shanghai', 'China', 'charlottech@gmail.com', 8621555123,207800);
+customers_procedure('Sarah', 'Lee', 'F', '11-12-1990', 'Toronto', 'Canada', 'sarahlee@gmail.com', 4165557890, 501223);
+customers_procedure('David', 'Wong', 'M', '04-20-1987', 'Vancouver', 'Canada', 'davidwong@gmail.com', 6045551234, 603446);
+customers_procedure('Sophia', 'Nguyen', 'F', '08-07-1995', 'Houston', 'USA', 'sophianguyen@gmail.com', 5553692580, 700223);
+customers_procedure('Sara', 'Jones', 'F', '04-20-1990', 'Chicago', 'Illinois', 'sarajones@gmail.com', 3125556789, 60601);
+customers_procedure('David', 'Lee', 'M', '11-03-1987', 'San Francisco', 'California', 'davidlee@gmail.com', 4155551234, 94103);
+customers_procedure('Emily', 'Nguyen', 'F', '07-07-1995', 'Houston', 'Texas', 'emilynguyen@gmail.com', 7135558901, 77004);
+customers_procedure('Thomas', 'Johnson', 'M', '02-14-1980', 'Denver', 'Colorado', 'thomasjohnson@gmail.com', 3035554567, 80202);
+customers_procedure('Grace', 'Kim', 'F', '09-08-1992', 'Seattle', 'Washington', 'gracekim@gmail.com', 2065557890, 98101);
+customers_procedure('Sarah', 'Smith', 'F', '06-25-1990', 'Chicago', 'USA', 'sarahsmith@gmail.com', 3125556789, 60610);
+customers_procedure('Mike', 'Johnson', 'M', '02-14-1987', 'Los Angeles', 'USA', 'mikejohnson@gmail.com', 2135552345, 90001);
+customers_procedure('Emily', 'Brown', 'F', '11-07-1995', 'Houston', 'USA', 'emilybrown@gmail.com', 8325557890, 77002);
+customers_procedure('Maria', 'Garcia', 'F', '05-04-1989', 'Madrid', 'Spain', 'mariagarcia@gmail.com', 9125556789, 28013);
+customers_procedure('Sarah', 'Jones', 'F', '05-28-1990', 'San Francisco', 'CA', 'sarahjones@gmail.com', 4151234567, 94103);
+customers_procedure('Michael', 'Smith', 'M', '12-15-1982', 'Los Angeles', 'CA', 'michaelsmith@gmail.com', 3101234567, 90001);
+customers_procedure('Emily', 'Davis', 'F', '06-20-1998', 'Chicago', 'IL', 'emilydavis@gmail.com', 3121234567, 60601);
+customers_procedure('Christopher', 'Lee', 'M', '01-10-1995', 'Houston', 'TX', 'christopherlee@gmail.com', 7131234567, 77002);
+customers_procedure('Amanda', 'Nguyen', 'F', '09-02-1989', 'Seattle', 'WA', 'amandanguyen@gmail.com', 2061234567, 98101);
+customers_procedure('David', 'Wilson', 'M', '11-05-1980', 'Boston', 'MA', 'davidwilson@gmail.com', 6171234567, 02108);
+customers_procedure('Melissa', 'Taylor', 'F', '03-18-1991', 'Denver', 'CO', 'melissataylor@gmail.com', 3031234567, 80202);
+customers_procedure('Matthew', 'Garcia', 'M', '08-12-1988', 'San Diego', 'CA', 'matthewgarcia@gmail.com', 6191234567, 92101);
+customers_procedure('Sophia', 'Chen', 'F', '04-25-1997', 'Portland', 'OR', 'sophiachen@gmail.com', 5031234567, 97201);
+customers_procedure('Andrew', 'Kim', 'M', '07-08-1987', 'New York', 'NY', 'andrewkim@gmail.com', 2121234567, 10001);
+customers_procedure('Isabella', 'Lopez', 'F', '02-14-1993', 'Miami', 'FL', 'isabellalopez@gmail.com', 3051234567, 33101);
+customers_procedure('Daniel', 'Wang', 'M', '10-01-1984', 'San Francisco', 'CA', 'danielwang@gmail.com', 4151234567, 94103);
+customers_procedure('Olivia', 'Martin', 'F', '07-03-1994', 'Los Angeles', 'CA', 'oliviamartin@gmail.com', 3101234567, 90001);
+customers_procedure('Ethan', 'Nguyen', 'M', '09-22-1986', 'Chicago', 'IL', 'ethannguyen@gmail.com', 3121234567, 60601);
+customers_procedure('Emma', 'Liu', 'F', '12-08-1999', 'Houston', 'TX', 'emmaliu@gmail.com', 7131234567, 77002);
+customers_procedure('William', 'Park', 'M', '05-13-1983', 'Seattle', 'WA', 'williampark@gmail.com', 2061234567, 98101);
+end;
+create sequence seq_costs start with 100 increment by 1;
+create or replace procedure costs_procedure
+(
+    prod_id in costs.product_id%type,
+    time_id in costs.time_id%type,
+    promo_id in costs.promo_id%type,
+    promo_cost in costs.unit_cost%type
+)
+is
+begin
+insert into costs values(prod_id,time_id,promo_id,promo_cost);
+end;
+
+create sequence seq_sales start with 100 increment by 1;
+create or replace procedure sales_procedure
+(
+    prod_id in sale.prod_id%type,
+    cust_id in sale.cust_id%type,
+    time_id in sale.time_id%type,
+    promo_id in sale.promo_id%type,
+    quantity_sold in sale.quantity_sold%type,
+    amount_sold in sale.amount_sold%type
+)
+is
+begin
+insert into sale values(prod_id,cust_id,time_id,promo_id,quantity_sold,amount_sold);
+end;
+create or replace trigger trig_insert_customers
+after insert on customers
+for each row
+begin
+ DBMS_OUTPUT.PUT_LINE('row inserted successsully');
+end;
+
+create  or replace trigger trig_on_delete
+before delete on customers
+for each row
+begin
+delete from sale where cust_id=:old.cust_id;
+end;
+
